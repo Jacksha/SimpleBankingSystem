@@ -21,6 +21,21 @@ public class Main {
                     AccountManager.createNewAcc();
                     break;
 
+                case 2:
+                    if (AccountManager.loginToAcc()) {
+                        System.out.println("\nYou have successfully logged in!\n");
+                        System.out.println("1. Balance\n" +
+                                "2. Log out\n" +
+                                "0. Exit");
+                        int subChoice = scanner.nextInt();
+                        scanner.nextLine();
+                        switch (subChoice) {
+                            case 1:
+                                System.out.println();
+
+                        }
+                    }
+
                 case 5:
                     System.out.println("\nNumber of available Acc slots: " + AccountManager.getNumOfFreeSlots() + "\n");
                     break;
