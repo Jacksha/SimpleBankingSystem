@@ -6,7 +6,7 @@ public class BankAccount {
     private int accNum;
     private String cardNum;
     private String pin;
-    private int balance;
+    private int balance = 0;
 
     public int getAccNum() {
         return accNum;

@@ -16,11 +16,13 @@ public class Main {
                     "0. Exit");
             mainChoice = scanner.nextInt();
 
+            // main menu
             switch (mainChoice) {
+                // create account
                 case 1:
                     AccountManager.createNewAcc();
                     break;
-
+                // login
                 case 2:
                     if (AccountManager.loginToAcc()) {
                         System.out.println("\nYou have successfully logged in!\n");
@@ -29,12 +31,25 @@ public class Main {
                                 "0. Exit");
                         int subChoice = scanner.nextInt();
                         scanner.nextLine();
+
+                        // submenu
                         switch (subChoice) {
                             case 1:
-                                System.out.println();
-
+                                System.out.println("\nBalance: " + AccountManager.getAccBalance());
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                isMainMenu = false;
+                                break;
+                            default:
+                                System.out.println("Wrong input");
                         }
+
+                    } else {
+                        System.out.println("Wrong credentials");
                     }
+                    break;
 
                 case 5:
                     System.out.println("\nNumber of available Acc slots: " + AccountManager.getNumOfFreeSlots() + "\n");
@@ -44,6 +59,8 @@ public class Main {
                     isMainMenu = false;
                     System.out.println("exiting...");
                     break;
+                default:
+                    System.out.println("Wrong input");
             }
         } while (isMainMenu);
         

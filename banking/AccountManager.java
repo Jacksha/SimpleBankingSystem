@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class AccountManager {
     static int numOfAccs;
     static final int MAXNUMOFACCS = 20;
-    static BankAccount[] bankAccount = new BankAccount[AccountManager.MAXNUMOFACCS];
+    static BankAccount[] bankAccountArray = new BankAccount[AccountManager.MAXNUMOFACCS];
     static Scanner scanner = new Scanner(System.in);
     static int curAcc = 0;
 
@@ -14,25 +14,26 @@ public class AccountManager {
     // Create New Account static method
     public static void createNewAcc() {
         if (numOfAccs < MAXNUMOFACCS) {
-            numOfAccs++;
-            bankAccount[numOfAccs] = new BankAccount();
+
+            bankAccountArray[numOfAccs] = new BankAccount();
 
             // generating acc number & card number and message
             Random random = new Random();
-            bankAccount[numOfAccs].setAccNum(random.nextInt(1000000000));
-            bankAccount[numOfAccs].setCardNum("400000" + bankAccount[numOfAccs].getAccNum() + "5");
+            bankAccountArray[numOfAccs].setAccNum(random.nextInt(1000000000));
+            bankAccountArray[numOfAccs].setCardNum("400000" + bankAccountArray[numOfAccs].getAccNum() + "5");
             System.out.println("");
             System.out.println("Your card has been created\n" +
                     "Your card number:\n" +
-                    bankAccount[numOfAccs].getCardNum());
+                    bankAccountArray[numOfAccs].getCardNum());
 
             // generating pin and message
-            bankAccount[numOfAccs].setPin(String.valueOf(random.nextInt(10000)));
+            bankAccountArray[numOfAccs].setPin(String.valueOf(random.nextInt(10000)));
             System.out.println("Your card PIN:\n" +
-                    bankAccount[numOfAccs].getPin());
+                    bankAccountArray[numOfAccs].getPin());
             System.out.println("");
 
-            bankAccount[numOfAccs].setBalance(0);
+            bankAccountArray[numOfAccs].setBalance(0);
+            numOfAccs++;
         } else {
             System.out.println("Out of space for new Accounts");
         }
@@ -54,7 +55,7 @@ public class AccountManager {
         boolean isChecked = false;
 
         for (int i = 0; i < numOfAccs; i++) {
-            if (crdNumEntry.equals(bankAccount[i].getCardNum()) && pinEntry.equals(bankAccount[i].getPin())) {
+            if (crdNumEntry.equals(bankAccountArray[i].getCardNum()) && pinEntry.equals(bankAccountArray[i].getPin())) {
                 isChecked = true;
                 curAcc = i;
             } else {
@@ -62,5 +63,10 @@ public class AccountManager {
             }
         }
         return isChecked;
+    }
+
+    // get balance from login
+    public static int getAccBalance() {
+        return bankAccountArray[curAcc].getBalance();
     }
 }
