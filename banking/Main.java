@@ -41,7 +41,7 @@ public class Main {
                             switch (subChoice) {
                                 // get bank balance for the user
                                 case 1:
-                                    System.out.println("\nBalance: " + AccountManager.getAccBalance());
+                                    System.out.println("\nBalance: " + AccountManager.getAccBalance() + "\n");
                                     break;
                                 // logout
                                 case 2:
@@ -78,7 +78,5 @@ public class Main {
                     System.out.println("Wrong input");
             }
         } while (isMainMenu);
-        
-
     }
 }

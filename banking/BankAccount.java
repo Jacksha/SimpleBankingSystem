@@ -3,25 +3,25 @@ package banking;
 import java.util.Random;
 
 public class BankAccount {
-    private int accNum;
-    private String cardNum;
+    private String accStr;
+    private String cardStr;
     private String pin;
-    private int balance = 0;
+    private int balance;
 
-    public int getAccNum() {
-        return accNum;
+    public String getAccStr() {
+        return accStr;
     }
 
-    public void setAccNum(int accNum) {
-        this.accNum = accNum;
+    public void setAccStr(String accStr) {
+        this.accStr = accStr;
     }
 
-    public String getCardNum() {
-        return cardNum;
+    public String getCardStr() {
+        return cardStr;
     }
 
-    public void setCardNum(String cardNum) {
-        this.cardNum = cardNum;
+    public void setCardStr(String cardStr) {
+        this.cardStr = cardStr;
     }
 
     public String getPin() {
