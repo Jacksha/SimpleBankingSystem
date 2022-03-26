@@ -113,18 +113,18 @@ public class AccountManager {
         int nDigits = BIN.length() + accStr.length();
         String fullNum = BIN + accStr;
         int sum = 0;
-        boolean isSecond = false;
+        boolean isOdd = true;
         for (int i = nDigits - 1; i >= 0; i--)
         {
-            int d = fullNum.charAt(i);
-            if (isSecond == true) {
+            int d = fullNum.charAt(i) - '0';
+            if (isOdd == true) {
                 d = d * 2;
             }
             if (d > 9) {
                 d -= 9;
             }
             sum += d;
-            isSecond = !isSecond;
+            isOdd = !isOdd;
         }
         if (sum % 10 == 0) {
             return 0;
