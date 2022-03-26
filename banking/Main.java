@@ -12,7 +12,7 @@ public class Main {
         do {
             // main menu
             System.out.println(
-                    "1. Create an account\n" +
+                    "\n1. Create an account\n" +
                     "2. Log into account\n" +
                     "5. Number of free slots\n" +
                     "0. Exit");
@@ -30,7 +30,7 @@ public class Main {
 
                         do {
                             // submenu
-                            System.out.println("User options: ");
+                            System.out.println("User options for account: " + AccountManager.getAccountString());
                             System.out.println(
                                     "1. Balance\n" +
                                     "2. Log out\n" +

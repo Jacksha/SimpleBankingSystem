@@ -10,6 +10,8 @@ public class AccountManager {
     static final int MAXNUMOFACCS = 20;
     static final int ACCNUMINTERVAL = 1_000_000_000;
     static final int ACCPININTERVAL = 10_000;
+    static final String BIN = "400000";
+
     static BankAccount[] bankAccountArray = new BankAccount[AccountManager.MAXNUMOFACCS];
     static int curAccIndex = 0;
 
@@ -21,12 +23,17 @@ public class AccountManager {
             // making instances
             bankAccountArray[numOfAccs] = new BankAccount();
             Random random = new Random();
+            String accountNum;
 
-            // generating acc number & card number and a message
-            String generatedAccStr = String.valueOf(random.nextInt(ACCNUMINTERVAL) + ACCNUMINTERVAL);
-            generatedAccStr = generatedAccStr.substring(1);
-            bankAccountArray[numOfAccs].setAccStr(generatedAccStr);
-            bankAccountArray[numOfAccs].setCardStr("400000" + bankAccountArray[numOfAccs].getAccStr() + "5");
+            // generating unique acc number & card number and a message
+            do {
+                String generatedAccStr = String.valueOf(random.nextInt(ACCNUMINTERVAL) + ACCNUMINTERVAL);
+                generatedAccStr = generatedAccStr.substring(1);
+                bankAccountArray[numOfAccs].setAccStr(generatedAccStr);
+                accountNum = bankAccountArray[numOfAccs].getAccStr();
+            } while (checkIfAccExists(accountNum));
+
+            bankAccountArray[numOfAccs].setCardStr(BIN + accountNum + getChecksumAcc(accountNum));
             System.out.println("");
             System.out.println("Your card has been created\n" +
                     "Your card number:\n" +
@@ -44,7 +51,7 @@ public class AccountManager {
             bankAccountArray[numOfAccs].setBalance(0);
             numOfAccs++;
         } else {
-            System.out.println("Out of space for new Accounts");
+            System.out.println("\nOut of space for new Accounts!\n");
         }
     }
 
@@ -71,6 +78,7 @@ public class AccountManager {
             if (crdNumEntry.equals(bankAccountArray[i].getCardStr()) && pinEntry.equals(bankAccountArray[i].getPin())) {
                 isChecked = true;
                 curAccIndex = i;
+                break;
             } else {
                 isChecked = false;
             }
@@ -78,8 +86,50 @@ public class AccountManager {
         return isChecked;
     }
 
+    // check if account exits
+    public static boolean checkIfAccExists(String accStr) {
+        boolean exists = false;
+        for (int i = 0; i < numOfAccs; i++) {
+            if (accStr.equals(bankAccountArray[i].getAccStr())) {
+                exists = true;
+                break;
+            }
+        }
+        return exists;
+    }
+
     // get balance from login
     public static int getAccBalance() {
         return bankAccountArray[curAccIndex].getBalance();
+    }
+
+    // get account number from login
+    public static String getAccountString() {
+        return bankAccountArray[curAccIndex].getAccStr();
+    }
+
+    // get checksum using Luhn algorithm from account number
+    public static int getChecksumAcc(String accStr) {
+        int nDigits = BIN.length() + accStr.length();
+        String fullNum = BIN + accStr;
+        int sum = 0;
+        boolean isSecond = false;
+        for (int i = nDigits - 1; i >= 0; i--)
+        {
+            int d = fullNum.charAt(i);
+            if (isSecond == true) {
+                d = d * 2;
+            }
+            if (d > 9) {
+                d -= 9;
+            }
+            sum += d;
+            isSecond = !isSecond;
+        }
+        if (sum % 10 == 0) {
+            return 0;
+        } else {
+            return 10 - sum % 10;
+        }
     }
 }

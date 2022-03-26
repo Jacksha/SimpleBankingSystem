@@ -1,7 +1,5 @@
 package banking;
 
-import java.util.Random;
-
 public class BankAccount {
     private String accStr;
     private String cardStr;
@@ -9,7 +7,7 @@ public class BankAccount {
     private int balance;
 
     public String getAccStr() {
-        return accStr;
+        return this.accStr;
     }
 
     public void setAccStr(String accStr) {
@@ -17,7 +15,7 @@ public class BankAccount {
     }
 
     public String getCardStr() {
-        return cardStr;
+        return this.cardStr;
     }
 
     public void setCardStr(String cardStr) {
@@ -25,7 +23,7 @@ public class BankAccount {
     }
 
     public String getPin() {
-        return pin;
+        return this.pin;
     }
 
     public void setPin(String pin) {
