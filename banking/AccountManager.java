@@ -62,7 +62,7 @@ public class AccountManager {
     }
 
     // login entre & check credentials
-    public static boolean loginToAcc() {
+    public static boolean loginToAcc(AccountsDaoSqlite dao) {
 
         System.out.println("Enter your card number: ");
         String crdNumEntry = scanner.next();
@@ -73,6 +73,8 @@ public class AccountManager {
         scanner.nextLine();
 
         boolean isChecked = false;
+
+        dao.mapAllAccounts();
 
         // check if given card number and pin exist on same bank account
         for (int i = 0; i < numOfAccs; i++) {

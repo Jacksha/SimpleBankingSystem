@@ -28,7 +28,7 @@ public class Main {
                     break;
                 // login
                 case 2:
-                    if (AccountManager.loginToAcc()) {
+                    if (AccountManager.loginToAcc(dao)) {
                         System.out.println("\nYou have successfully logged in!\n");
 
                         do {

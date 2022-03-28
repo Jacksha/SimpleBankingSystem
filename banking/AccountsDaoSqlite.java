@@ -41,6 +41,30 @@ public class AccountsDaoSqlite {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    public Map<String, BankAccount> mapAllAccounts() {
+        Map<String, BankAccount> accountsMap = new HashMap<>();
+        String sql = "SELECT * FROM accounts";
+
+        try {
+            Statement statement = conn.createStatement();
+
+            ResultSet result = statement.executeQuery(sql);
+
+            while (result.next()) {
+                BankAccount bankAccount = new BankAccount();
+                bankAccount.setAccStr(result.getString("id"));
+                bankAccount.setCardStr(result.getString("number"));
+                bankAccount.setPin(result.getString("pin"));
+                bankAccount.setBalance(result.getInt("balance"));
+
+                accountsMap.put(bankAccount.getAccStr(), bankAccount);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return accountsMap;
     }
 }
