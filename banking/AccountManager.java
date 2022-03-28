@@ -13,8 +13,17 @@ public class AccountManager {
     static final String BIN = "400000";
 
     static BankAccount[] bankAccountArray = new BankAccount[AccountManager.MAXNUMOFACCS];
-    static int curAccIndex = 0;
 
+    private static int curAccKey = 0;
+
+
+    public static int getCurAccKey() {
+        return curAccKey;
+    }
+
+    public static void setCurAccKey(int curAccKey) {
+        AccountManager.curAccKey = curAccKey;
+    }
 
     // Create New Account static method
     public static void createNewAcc(AccountsDaoSqlite dao) {
@@ -74,17 +83,16 @@ public class AccountManager {
 
         boolean isChecked = false;
 
-        dao.mapAllAccounts();
+        allAccounts = dao.mapAllAccounts();
 
+        String key = getAccFromCard(crdNumEntry);
+        System.out.println(key);
         // check if given card number and pin exist on same bank account
-        for (int i = 0; i < numOfAccs; i++) {
-            if (crdNumEntry.equals(bankAccountArray[i].getCardStr()) && pinEntry.equals(bankAccountArray[i].getPin())) {
-                isChecked = true;
-                curAccIndex = i;
-                break;
-            } else {
-                isChecked = false;
-            }
+        if (crdNumEntry.equals(allAccounts.get(key).getCardStr()) && pinEntry.equals(allAccounts.get(key).getPin())) {
+            isChecked = true;
+            setCurAccKey(Integer.parseInt(key));
+        } else {
+            isChecked = false;
         }
         return isChecked;
     }
@@ -92,23 +100,25 @@ public class AccountManager {
     // check if account exits
     public static boolean checkIfAccExists(String accStr) {
         boolean exists = false;
-        for (int i = 0; i < numOfAccs; i++) {
-            if (accStr.equals(bankAccountArray[i].getAccStr())) {
-                exists = true;
-                break;
-            }
+        if (allAccounts.containsKey(accStr)) {
+            exists = true;
         }
         return exists;
     }
 
     // get balance from login
     public static int getAccBalance() {
-        return bankAccountArray[curAccIndex].getBalance();
+        return allAccounts.get(getCurAccKey()).getBalance();
     }
 
     // get account number from login
     public static String getAccountString() {
-        return bankAccountArray[curAccIndex].getAccStr();
+        return String.valueOf(getCurAccKey());
+    }
+
+    // get account string from cardstring
+    public static String getAccFromCard(String cardString) {
+        return cardString.substring(6, cardString.length()-1);
     }
 
     // get checksum using Luhn algorithm from account number

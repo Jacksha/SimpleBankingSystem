@@ -1,5 +1,7 @@
 package banking;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -11,6 +13,10 @@ public class Main {
 
         // connect or create databace
         AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
+
+        // initalize and update map
+        Map<String, BankAccount> allAccounts = new HashMap<>();
+        allAccounts = dao.mapAllAccounts();
         
         do {
             // main menu
