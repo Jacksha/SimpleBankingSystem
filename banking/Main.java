@@ -8,6 +8,9 @@ public class Main {
         boolean isMainMenu = true;
         boolean isSubMenu = true;
         int mainChoice;
+
+        // connect or create databace
+        AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
         
         do {
             // main menu
@@ -21,7 +24,7 @@ public class Main {
             switch (mainChoice) {
                 // create account
                 case 1:
-                    AccountManager.createNewAcc();
+                    AccountManager.createNewAcc(dao);
                     break;
                 // login
                 case 2:

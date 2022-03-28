@@ -7,7 +7,7 @@ public class AccountManager {
     static Scanner scanner = new Scanner(System.in);
 
     static int numOfAccs;
-    static final int MAXNUMOFACCS = 20;
+    static final int MAXNUMOFACCS = 100;
     static final int ACCNUMINTERVAL = 1_000_000_000;
     static final int ACCPININTERVAL = 10_000;
     static final String BIN = "400000";
@@ -17,7 +17,7 @@ public class AccountManager {
 
 
     // Create New Account static method
-    public static void createNewAcc() {
+    public static void createNewAcc(AccountsDaoSqlite dao) {
         if (numOfAccs < MAXNUMOFACCS) {
 
             // making instances
@@ -49,6 +49,7 @@ public class AccountManager {
 
             // setting acc balance to 0 and rising number of used accounts
             bankAccountArray[numOfAccs].setBalance(0);
+            dao.saveAccount(bankAccountArray[numOfAccs]);
             numOfAccs++;
         } else {
             System.out.println("\nOut of space for new Accounts!\n");
