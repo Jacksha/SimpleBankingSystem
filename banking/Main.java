@@ -11,19 +11,17 @@ public class Main {
         boolean isSubMenu = true;
         int mainChoice;
 
-        // connect or create databace
+        // connect or create database
         AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
 
-        // initalize and update map
-        Map<String, BankAccount> allAccounts = new HashMap<>();
-        allAccounts = dao.mapAllAccounts();
+        // initialize a temp map from database
+        AccountManager.initAccsFromDB(dao.mapAllAccountsDB());
         
         do {
             // main menu
             System.out.println(
                     "\n1. Create an account\n" +
                     "2. Log into account\n" +
-                    "5. Number of free slots\n" +
                     "0. Exit");
             mainChoice = scanner.nextInt();
 
@@ -34,7 +32,7 @@ public class Main {
                     break;
                 // login
                 case 2:
-                    if (AccountManager.loginToAcc(dao)) {
+                    if (AccountManager.loginToAcc()) {
                         System.out.println("\nYou have successfully logged in!\n");
 
                         do {
@@ -43,6 +41,7 @@ public class Main {
                             System.out.println(
                                     "1. Balance\n" +
                                     "2. Log out\n" +
+                                    "3. Delete Account\n" +
                                     "0. Exit");
                             int subChoice = scanner.nextInt();
                             scanner.nextLine();
@@ -55,6 +54,12 @@ public class Main {
                                 // logout
                                 case 2:
                                     isSubMenu = false;
+                                    break;
+                                // delete account
+                                case 3:
+                                    AccountManager.deleteAccount(dao);
+                                    System.out.println("Account deleted");
+                                    isMainMenu = false;
                                     break;
                                 // exit
                                 case 0:
@@ -72,10 +77,6 @@ public class Main {
                     } else {
                         System.out.println("Wrong credentials");
                     }
-                    break;
-                // number of available acc slots
-                case 5:
-                    System.out.println("\nNumber of available Acc slots: " + AccountManager.getNumOfFreeSlots() + "\n");
                     break;
                 // exit program
                 case 0:

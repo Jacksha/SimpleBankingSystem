@@ -43,7 +43,19 @@ public class AccountsDaoSqlite {
         }
     }
 
-    public Map<String, BankAccount> mapAllAccounts() {
+    public void deleteAccount(int id) {
+        String sql = "DELETE FROM accounts WHERE id = " + id;
+
+        try  {
+            PreparedStatement s = conn.prepareStatement(sql);
+
+            s.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Map<String, BankAccount> mapAllAccountsDB() {
         Map<String, BankAccount> accountsMap = new HashMap<>();
         String sql = "SELECT * FROM accounts";
 

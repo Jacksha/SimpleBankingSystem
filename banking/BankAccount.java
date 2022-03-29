@@ -6,6 +6,16 @@ public class BankAccount {
     private String pin;
     private int balance;
 
+    public BankAccount() {
+    }
+
+    public BankAccount(String accStr, String cardStr, String pin, int balance) {
+        this.accStr = accStr;
+        this.cardStr = cardStr;
+        this.pin = pin;
+        this.balance = balance;
+    }
+
     public String getAccStr() {
         return this.accStr;
     }

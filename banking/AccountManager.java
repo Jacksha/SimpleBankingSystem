@@ -1,20 +1,19 @@
 package banking;
 
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
 public class AccountManager {
     static Scanner scanner = new Scanner(System.in);
 
-    static int numOfAccs;
-    static final int MAXNUMOFACCS = 100;
     static final int ACCNUMINTERVAL = 1_000_000_000;
     static final int ACCPININTERVAL = 10_000;
     static final String BIN = "400000";
-
-    static BankAccount[] bankAccountArray = new BankAccount[AccountManager.MAXNUMOFACCS];
-
     private static int curAccKey = 0;
+
+    // initialize and update map
+    static Map<String, BankAccount> allAccountsTmp;
 
 
     public static int getCurAccKey() {
@@ -25,53 +24,58 @@ public class AccountManager {
         AccountManager.curAccKey = curAccKey;
     }
 
+    // initialize the map
+    public static void initAccsFromDB(Map<String, BankAccount> allAccountsDB) {
+        allAccountsTmp = allAccountsDB;
+    }
+
     // Create New Account static method
     public static void createNewAcc(AccountsDaoSqlite dao) {
-        if (numOfAccs < MAXNUMOFACCS) {
 
-            // making instances
-            bankAccountArray[numOfAccs] = new BankAccount();
-            Random random = new Random();
-            String accountNum;
+        // making instances
+        Random random = new Random();
+        String accountNumStr;
+        String cardStr;
+        String generatedAccPin;
 
-            // generating unique acc number & card number and a message
-            do {
-                String generatedAccStr = String.valueOf(random.nextInt(ACCNUMINTERVAL) + ACCNUMINTERVAL);
-                generatedAccStr = generatedAccStr.substring(1);
-                bankAccountArray[numOfAccs].setAccStr(generatedAccStr);
-                accountNum = bankAccountArray[numOfAccs].getAccStr();
-            } while (checkIfAccExists(accountNum));
+        // generating unique acc number & card number and a message
+        do {
+            accountNumStr = String.valueOf(random.nextInt(ACCNUMINTERVAL) + ACCNUMINTERVAL);
+            accountNumStr = accountNumStr.substring(1);
+        } while (checkIfAccExists(accountNumStr));
 
-            bankAccountArray[numOfAccs].setCardStr(BIN + accountNum + getChecksumAcc(accountNum));
-            System.out.println("");
-            System.out.println("Your card has been created\n" +
-                    "Your card number:\n" +
-                    bankAccountArray[numOfAccs].getCardStr());
+        cardStr = BIN + accountNumStr + getChecksumAcc(accountNumStr);
 
-            // generating pin and a message
-            String generatedAccPin = String.valueOf(random.nextInt(ACCPININTERVAL) + ACCPININTERVAL);
-            generatedAccPin = generatedAccPin.substring(1);
-            bankAccountArray[numOfAccs].setPin(generatedAccPin);
-            System.out.println("Your card PIN:\n" +
-                    bankAccountArray[numOfAccs].getPin());
-            System.out.println("");
+        System.out.println("");
+        System.out.println("Your card has been created\n" +
+                "Your card number:\n" +
+                cardStr);
 
-            // setting acc balance to 0 and rising number of used accounts
-            bankAccountArray[numOfAccs].setBalance(0);
-            dao.saveAccount(bankAccountArray[numOfAccs]);
-            numOfAccs++;
-        } else {
-            System.out.println("\nOut of space for new Accounts!\n");
-        }
+        // generating pin and a message
+        generatedAccPin = String.valueOf(random.nextInt(ACCPININTERVAL) + ACCPININTERVAL);
+        generatedAccPin = generatedAccPin.substring(1);
+        System.out.println("Your card PIN:\n" +
+                generatedAccPin);
+        System.out.println("");
+
+        // add account to temp map and set balance to 0
+        BankAccount newAcc = new BankAccount(accountNumStr, cardStr, generatedAccPin, 0);
+        allAccountsTmp.put(accountNumStr, newAcc);
+
+        // save acc to db
+        dao.saveAccount(newAcc);
     }
 
-    // num of free account slots
-    public static int getNumOfFreeSlots() {
-        return MAXNUMOFACCS - numOfAccs;
+    // delete an account
+    public static void deleteAccount(AccountsDaoSqlite dao) {
+        dao.deleteAccount(curAccKey);
+        allAccountsTmp.remove(curAccKey);
+        curAccKey = 0;
     }
+
 
     // login entre & check credentials
-    public static boolean loginToAcc(AccountsDaoSqlite dao) {
+    public static boolean loginToAcc() {
 
         System.out.println("Enter your card number: ");
         String crdNumEntry = scanner.next();
@@ -83,12 +87,12 @@ public class AccountManager {
 
         boolean isChecked = false;
 
-        allAccounts = dao.mapAllAccounts();
-
+        // getting the account number from card number for the map key
         String key = getAccFromCard(crdNumEntry);
         System.out.println(key);
+
         // check if given card number and pin exist on same bank account
-        if (crdNumEntry.equals(allAccounts.get(key).getCardStr()) && pinEntry.equals(allAccounts.get(key).getPin())) {
+        if (crdNumEntry.equals(allAccountsTmp.get(key).getCardStr()) && pinEntry.equals(allAccountsTmp.get(key).getPin())) {
             isChecked = true;
             setCurAccKey(Integer.parseInt(key));
         } else {
@@ -100,7 +104,7 @@ public class AccountManager {
     // check if account exits
     public static boolean checkIfAccExists(String accStr) {
         boolean exists = false;
-        if (allAccounts.containsKey(accStr)) {
+        if (allAccountsTmp.containsKey(accStr)) {
             exists = true;
         }
         return exists;
@@ -108,10 +112,10 @@ public class AccountManager {
 
     // get balance from login
     public static int getAccBalance() {
-        return allAccounts.get(getCurAccKey()).getBalance();
+        return allAccountsTmp.get(getAccountString()).getBalance();
     }
 
-    // get account number from login
+    // get account number on login
     public static String getAccountString() {
         return String.valueOf(getCurAccKey());
     }
