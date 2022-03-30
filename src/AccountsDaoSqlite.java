@@ -1,4 +1,4 @@
-package banking;
+package src;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ public class AccountsDaoSqlite {
     AccountsDaoSqlite(String fileName) {
 
         String createTableSql = "CREATE TABLE IF NOT EXISTS accounts (\n"
-                + "	id integer PRIMARY KEY,\n"
+                + "	id text PRIMARY KEY,\n"
                 + "	number text NOT NULL,\n"
                 + "	pin text NOT NULL,\n"
                 + "	balance integer\n"
@@ -32,7 +32,7 @@ public class AccountsDaoSqlite {
 
         try  {
             PreparedStatement s = conn.prepareStatement(sql);
-            s.setInt(1, Integer.parseInt(bankAccount.getAccStr()));
+            s.setString(1, bankAccount.getAccStr());
             s.setString(2, bankAccount.getCardStr());
             s.setString(3, bankAccount.getPin());
             s.setInt(4, bankAccount.getBalance());
@@ -43,10 +43,22 @@ public class AccountsDaoSqlite {
         }
     }
 
-    public void deleteAccount(int id) {
-        String sql = "DELETE FROM accounts WHERE id = " + id;
+    public void deleteAccount(String id) {
+        String sql = "DELETE FROM accounts WHERE id = \'" + id + "\'";
 
         try  {
+            PreparedStatement s = conn.prepareStatement(sql);
+
+            s.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addIncome(String id, int amount) {
+        String sql = "UPDATE accounts SET balance = balance + " + amount + " WHERE id = \'" + id + "\'";
+
+        try {
             PreparedStatement s = conn.prepareStatement(sql);
 
             s.execute();
