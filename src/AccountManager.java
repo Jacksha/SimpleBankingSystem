@@ -10,27 +10,26 @@ public class AccountManager {
     static final int ACCNUMINTERVAL = 1_000_000_000;
     static final int ACCPININTERVAL = 10_000;
     static final String BIN = "400000";
-    private static String curAccKey;
+    private String curAccKey;
 
-    // initialize and update map
-    static Map<String, BankAccount> allAccountsTmp;
+    // connect to (or) create database
+    AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
+
+    // define and initialize the map of the BankAccount type class
+    Map<String, BankAccount> allAccountsTmp = dao.mapAllAccountsDB();
 
 
-    public static String getCurAccKey() {
+
+    public String getCurAccKey() {
         return curAccKey;
     }
 
-    public static void setCurAccKey(String curAccKey) {
-        AccountManager.curAccKey = curAccKey;
+    public void setCurAccKey(String curAccKey) {
+        this.curAccKey = curAccKey;
     }
 
-    // initialize the map
-    public static void initAccsFromDB(Map<String, BankAccount> allAccountsDB) {
-        allAccountsTmp = allAccountsDB;
-    }
-
-    // Create New Account static method
-    public static void createNewAcc(AccountsDaoSqlite dao) {
+    // Create New Account method
+    public void createNewAcc() {
 
         // making instances
         Random random = new Random();
@@ -66,8 +65,9 @@ public class AccountManager {
         dao.saveAccount(newAcc);
     }
 
+
     // delete an account
-    public static void deleteAccount(AccountsDaoSqlite dao) {
+    public void deleteAccount() {
         dao.deleteAccount(curAccKey);
         allAccountsTmp.remove(curAccKey);
         curAccKey = "";
@@ -75,7 +75,7 @@ public class AccountManager {
 
 
     // login entre & check credentials
-    public static boolean loginToAcc() {
+    public boolean loginToAcc() {
 
         System.out.println("Enter your card number: ");
         String crdNumEntry = scanner.next();
@@ -101,8 +101,9 @@ public class AccountManager {
         return isChecked;
     }
 
+
     // check if account exits
-    public static boolean checkIfAccExists(String accStr) {
+    public boolean checkIfAccExists(String accStr) {
         boolean exists = false;
         if (allAccountsTmp.containsKey(accStr)) {
             exists = true;
@@ -110,29 +111,83 @@ public class AccountManager {
         return exists;
     }
 
-    // get balance from login
-    public static int getAccBalance() {
-        return allAccountsTmp.get(getAccountString()).getBalance();
+
+    // check if card number is valid
+    public boolean checkIfCardStrIsvalid(String cardStr) {
+        String accStr = getAccFromCard(cardStr);
+        if (cardStr.equals(BIN + accStr + getChecksumAcc(accStr))) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
+
     // get account number on login
-    public static String getAccountString() {
+    public String getAccountString() {
         return String.valueOf(getCurAccKey());
     }
 
+
+    // get account string from card string
+    public String getAccFromCard(String cardString) {
+        return cardString.substring(6, cardString.length()-1);
+    }
+
+
+    // get balance from login
+    public int getAccBalance() {
+        return allAccountsTmp.get(getAccountString()).getBalance();
+    }
+
+
     // add income from login
-    public static void addIncome(int amount, AccountsDaoSqlite dao) {
+    public void addIncome(int amount) {
+        int oldAmount = allAccountsTmp.get(curAccKey).getBalance();
         // add income in sql
         dao.addIncome(curAccKey, amount);
-        // add income to map
-        int oldAmount = allAccountsTmp.get(curAccKey).getBalance();
+        // add income to Hash Map
         allAccountsTmp.get(curAccKey).setBalance(oldAmount + amount);
     }
 
-    // get account string from cardstring
-    public static String getAccFromCard(String cardString) {
-        return cardString.substring(6, cardString.length()-1);
+    // make transaction from login
+    public boolean makeTrans(String cardStrDest) {
+        boolean repeatInput = true;
+        String accDestKey = getAccFromCard(cardStrDest);
+        int transAmount;
+        int oldAmount;
+
+        // repeat loop until valid input
+        do {
+            System.out.println("Enter how much money you want to transfer:");
+            transAmount = scanner.nextInt();
+            scanner.nextLine();
+            if (transAmount < 0) {
+                System.out.println("Invalid input! Try again.\n");
+            } else if (transAmount <= allAccountsTmp.get(curAccKey).getBalance()) {
+                repeatInput = false;
+            } else if (transAmount > allAccountsTmp.get(curAccKey).getBalance()) {
+                System.out.println("Not enough funds on your account!\n");
+            } else {
+                System.out.println("Invalid input! Try again.\n");
+            }
+        } while (repeatInput);
+
+        // remove funds from curr user in sql
+        dao.addIncome(curAccKey, -transAmount);
+        // add funds to target user in sql
+        dao.addIncome(accDestKey, transAmount);
+
+        // remove funds from current acc in Hash Map
+        oldAmount = allAccountsTmp.get(curAccKey).getBalance();
+        allAccountsTmp.get(curAccKey).setBalance(oldAmount - transAmount);
+        // add funds to target user in Hash Map
+        oldAmount = allAccountsTmp.get(accDestKey).getBalance();
+        allAccountsTmp.get(accDestKey).setBalance(oldAmount + transAmount);
+
+        return true;
     }
+
 
     // get checksum using Luhn algorithm from account number
     public static int getChecksumAcc(String accStr) {

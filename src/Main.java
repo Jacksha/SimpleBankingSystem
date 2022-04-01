@@ -9,11 +9,8 @@ public class Main {
         boolean isSubMenu = true;
         int mainChoice;
 
-        // connect or create database
-        AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
-
-        // initialize a temp map from database
-        AccountManager.initAccsFromDB(dao.mapAllAccountsDB());
+        // initialize Account Manager
+        AccountManager accMan = new AccountManager();
         
         do {
             // main menu
@@ -24,21 +21,24 @@ public class Main {
             mainChoice = scanner.nextInt();
 
             switch (mainChoice) {
+
                 // create account
                 case 1:
-                    AccountManager.createNewAcc(dao);
+                    accMan.createNewAcc();
                     break;
+
                 // login
                 case 2:
-                    if (AccountManager.loginToAcc()) {
+                    if (accMan.loginToAcc()) {
                         System.out.println("\nYou have successfully logged in!\n");
 
                         do {
                             // submenu
-                            System.out.println("User options for account: " + AccountManager.getAccountString());
+                            System.out.println("User options for account: " + accMan.getAccountString());
                             System.out.println(
                                     "1. Balance\n" +
                                     "2. Add income\n" +
+                                    "3. Do transfer\n" +
                                     "4. Close Account\n" +
                                     "5. Log out\n" +
                                     "0. Exit");
@@ -46,49 +46,74 @@ public class Main {
                             scanner.nextLine();
 
                             switch (subChoice) {
+
                                 // get bank balance for the user
                                 case 1:
-                                    System.out.println("\nBalance: " + AccountManager.getAccBalance() + "\n");
+                                    System.out.println("\nBalance: " + accMan.getAccBalance() + "\n");
                                     break;
+
                                 // add income
                                 case 2:
-                                    System.out.println("Enter income:");
-                                    AccountManager.addIncome(scanner.nextInt(), dao);
+                                    System.out.println("\nEnter income:");
+                                    accMan.addIncome(scanner.nextInt());
                                     scanner.nextLine();
                                     System.out.println("Income was added!\n");
                                     break;
+
+                                // do transfer
+                                case 3:
+                                    System.out.println("\nTransfer");
+                                    System.out.println("Enter card number:");
+                                    String cardNumEntry = scanner.nextLine();
+                                    if (accMan.checkIfCardStrIsvalid(cardNumEntry)) {
+                                        if (accMan.checkIfAccExists(accMan.getAccFromCard(cardNumEntry))) {
+                                            if (accMan.makeTrans(cardNumEntry)) {
+                                                System.out.println("Success!");
+                                            }
+                                        } else {
+                                            System.out.println("Such a card does not exist");
+                                        }
+                                    } else {
+                                        System.out.println("Probably you made a mistake in the card number. Please try again!");
+                                    }
+                                    break;
+
                                 // delete account
                                 case 4:
-                                    AccountManager.deleteAccount(dao);
+                                    accMan.deleteAccount();
                                     System.out.println("\nAccount deleted!\n");
                                     isSubMenu = false;
                                     break;
+
                                 // logout
                                 case 5:
                                     isSubMenu = false;
                                     break;
+
                                 // exit
                                 case 0:
                                     isSubMenu = false;
                                     isMainMenu = false;
                                     System.out.println("exiting...");
                                     break;
+
                                 // for wrong input
                                 default:
                                     System.out.println("Wrong input");
                             }
-
                         } while (isSubMenu);
 
                     } else {
                         System.out.println("Wrong credentials");
                     }
                     break;
+
                 // exit program
                 case 0:
                     isMainMenu = false;
                     System.out.println("exiting...");
                     break;
+
                 // for wrong input
                 default:
                     System.out.println("Wrong input");
