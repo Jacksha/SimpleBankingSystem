@@ -11,14 +11,26 @@ public class AccountManager {
     static final int ACCPININTERVAL = 10_000;
     static final String BIN = "400000";
     private String curAccKey;
+    String fileName;
+    AccountsDaoSqlite dao;
+    Map<String, BankAccount> allAccountsTmp;
 
-    // connect to (or) create database
-    AccountsDaoSqlite dao = new AccountsDaoSqlite("doc/accounts.db");
+    // constructor
+    public AccountManager(String fileName) {
+        this.fileName = fileName;
+        // initialize an object of AccountsDaoSqlite class
+        dao = new AccountsDaoSqlite(fileName);
+        // initialize the map of the BankAccount type class
+        allAccountsTmp = dao.mapAllAccountsDB();
+    }
 
-    // define and initialize the map of the BankAccount type class
-    Map<String, BankAccount> allAccountsTmp = dao.mapAllAccountsDB();
+    public String getFileName() {
+        return fileName;
+    }
 
-
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public String getCurAccKey() {
         return curAccKey;
@@ -92,7 +104,7 @@ public class AccountManager {
         System.out.println(key);
 
         // check if given card number and pin exist on same bank account
-        if (crdNumEntry.equals(allAccountsTmp.get(key).getCardStr()) && pinEntry.equals(allAccountsTmp.get(key).getPin())) {
+        if (checkIfCardStrIsvalid(crdNumEntry) && crdNumEntry.equals(allAccountsTmp.get(key).getCardStr()) && pinEntry.equals(allAccountsTmp.get(key).getPin())) {
             isChecked = true;
             setCurAccKey(key);
         } else {
@@ -105,7 +117,10 @@ public class AccountManager {
     // check if account exits
     public boolean checkIfAccExists(String accStr) {
         boolean exists = false;
-        if (allAccountsTmp.containsKey(accStr)) {
+        if (this.allAccountsTmp.isEmpty()) {
+            exists = false;
+            return exists;
+        } else if (allAccountsTmp.containsKey(accStr)) {
             exists = true;
         }
         return exists;
@@ -115,7 +130,21 @@ public class AccountManager {
     // check if card number is valid
     public boolean checkIfCardStrIsvalid(String cardStr) {
         String accStr = getAccFromCard(cardStr);
-        if (cardStr.equals(BIN + accStr + getChecksumAcc(accStr))) {
+        if (cardStr.length() != 16) {
+            return false;
+        } else if (cardStr.equals(BIN + accStr + getChecksumAcc(accStr))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // check if card is Luhn
+    public boolean checkIfLuhn(String cardStr) {
+        String accStr = getAccFromCard(cardStr);
+        if (cardStr.length() != 16) {
+            return false;
+        } else if (cardStr.substring(15).equals(getChecksumAcc(accStr))) {
             return true;
         } else {
             return false;
@@ -148,6 +177,25 @@ public class AccountManager {
         dao.addIncome(curAccKey, amount);
         // add income to Hash Map
         allAccountsTmp.get(curAccKey).setBalance(oldAmount + amount);
+    }
+
+    // transfer caller => calls transaction if card number is valid
+    public void callForTransfer(String cardNumEntry) {
+        if (this.checkLuhnCard(cardNumEntry)) {
+            if (this.checkIfAccExists(this.getAccFromCard(cardNumEntry))) {
+                if (cardNumEntry.equals(this.allAccountsTmp.get(this.getCurAccKey()).getCardStr())) {
+                    System.out.println("You can't transfer money to the same account!");
+                } else if (this.makeTrans(cardNumEntry)) { // This is where transaction is made, check "makeTrans()"
+                    System.out.println("Success!");
+                } else {
+                    System.out.println("Something went wrong");
+                }
+            } else {
+                System.out.println("Such a card does not exist");
+            }
+        } else {
+            System.out.println("Probably you made a mistake in the card number. Please try again!");
+        }
     }
 
     // make transaction from login
@@ -212,5 +260,24 @@ public class AccountManager {
         } else {
             return 10 - sum % 10;
         }
+    }
+
+    // get checksum using Luhn algorithm from card number
+    public static boolean checkLuhnCard(String cardStr) {
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = cardStr.length() - 1; i >= 0; i--)
+        {
+            int n = Integer.parseInt(cardStr.substring(i, i + 1));
+            if (alternate) {
+                n *= 2;
+                if (n > 9) {
+                    n = (n % 10) + 1;
+                }
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        return (sum % 10 == 0);
     }
 }
